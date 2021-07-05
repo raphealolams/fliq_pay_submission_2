@@ -6,8 +6,8 @@ Make sure mongodb running.
 
 2) 
 
-To run tests
-   npm run test 
+To run tests 
+   npm run cypress:open
 
 To start the app 
     npm run build
@@ -18,7 +18,7 @@ To start the app
     created, a unique Id is generated for quick references to the tickets such that different administrators 
     can attend to several tickets or pickup the conversation where it left off with the ticket Id.
 
-4) 
+4) Edge cases not properly tested. < 15% test coverage
 
 5) Refer to 1 and 2
 

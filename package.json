@@ -5,7 +5,12 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "rm -rf build/ && prettier --write source/ && tsc",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "cypress:open": "cypress open",
+    "drop": "mongo fliq_pay --eval 'db.users.drop()' && mongo fliqpay --eval 'db.tickets.drop()'",
+    "export:data": "mongodump -h localhost -p 27017 -d fliqpay -o seeders",
+    "export:json": "mongoexport -h localhost -p 27017 -d fliqpay -c users -o data/users.json --jsonArray  --pretty && mongoexport -h localhost -p 27017 -d fliq_pay -c tickets -o data/tickets.json --jsonArray  --pretty",
+    "import:data": "mongorestore -h localhost -p 27017 -d fliqpay --dir=./seeders/fliqpay"
   },
   "author": "",
   "license": "ISC",
@@ -31,6 +36,8 @@
     "@types/jsonwebtoken": "^8.5.3",
     "@types/lodash": "^4.14.170",
     "@types/mongoose": "^5.11.97",
-    "@types/pino": "^6.3.8"
+    "@types/pino": "^6.3.8",
+    "cypress": "^7.6.0",
+    "typescript": "^4.3.5"
   }
 }
