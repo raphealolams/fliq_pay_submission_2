@@ -4,9 +4,10 @@ import {
   createTicket,
   findTicket,
   findAndUpdate,
-  deleteTicket,
   findTickets,
 } from "../services/tickets.service";
+
+const ROLES = ["admin", "agent"];
 
 export async function createTicketHandler(
   req: Request,
@@ -38,9 +39,7 @@ export const closeTicketHandler = async (
     const userId = get(req, "user._id");
     const userRole = get(req, "user.role");
     const ticketId = get(req, "params.ticketId");
-    const update = req.body;
-
-    const ticket = await findTicket({ ticketId });
+    const ticket = await findTicket({ _id: ticketId });
 
     if (!ticket) {
       return res.status(404).send({
@@ -60,9 +59,13 @@ export const closeTicketHandler = async (
       });
     }
 
-    const updatedTicket = await findAndUpdate({ ticketId }, update, {
-      new: true,
-    });
+    const updatedTicket = await findAndUpdate(
+      { _id: ticketId },
+      { status: "closed" },
+      {
+        new: true,
+      }
+    );
 
     return res.status(200).send({
       status: false,
@@ -82,7 +85,7 @@ export async function getTicketHandler(
 ) {
   try {
     const ticketId = get(req, "params.ticketId");
-    const ticket = await findTicket({ ticketId });
+    const ticket = await findTicket({ _id: ticketId });
 
     if (!ticket) {
       return res.status(404).send({
@@ -110,7 +113,6 @@ export async function getTicketsHandler(
   next: NextFunction
 ) {
   try {
-    const role = get(req, 'user.role')
     const ticket = await findTickets({});
     return res.status(200).send({
       status: true,
@@ -121,25 +123,6 @@ export async function getTicketsHandler(
   } catch (error) {
     return next(error);
   }
-}
-
-export async function deletePostHandler(req: Request, res: Response) {
-  const userId = get(req, "user._id");
-  const postId = get(req, "params.postId");
-
-  const post = await findTicket({ postId });
-
-  if (!post) {
-    return res.sendStatus(404);
-  }
-
-  if (String(post.user) !== String(userId)) {
-    return res.sendStatus(401);
-  }
-
-  await deleteTicket({ postId });
-
-  return res.sendStatus(200);
 }
 
 /**
@@ -160,7 +143,7 @@ export const getMyTicketsHandler = async (
 
     const tickets = await findTickets({ user: userId });
     return res.status(200).send({
-      status: false,
+      status: true,
       code: 200,
       message: "ticket retrieved",
       data: tickets,
@@ -187,10 +170,80 @@ export const getUserTicketsHandler = async (
 
     const tickets = await findTickets({ user: userId });
     return res.status(200).send({
-      status: false,
+      status: true,
       code: 200,
       message: "ticket retrieved",
       data: tickets,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const saveComment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = get(req, "user._id");
+    const userRole = get(req, "user.role");
+    const ticketId = get(req, "params.ticketId");
+    const body = req.body;
+
+    const ticket = await findTicket({ _id: body.ticketId });
+
+    if (!ticket) {
+      return res.status(404).send({
+        status: false,
+        code: 404,
+        message: "invalid ticket id",
+        data: {},
+      });
+    }
+
+    if (ticket.comments.length === 0 && userRole === "user") {
+      return res.status(406).send({
+        status: false,
+        code: 406,
+        message: "You can't comment unless a support agent does",
+        data: {},
+      });
+    }
+
+    if (
+      ticket.comments.length > 0 ||
+      (ROLES.includes(userRole) && ticket.comments.length === 0)
+    ) {
+      const updatedTicket = await findAndUpdate(
+        { _id: ticketId },
+        {
+          $addToSet: {
+            comments: {
+              comment: body.comment,
+              author: userRole,
+              user: userId,
+            },
+          },
+        },
+        {
+          new: true,
+        }
+      );
+
+      return res.status(200).send({
+        status: true,
+        code: 200,
+        message: "ticket closed",
+        data: updatedTicket,
+      });
+    }
+
+    return res.status(422).send({
+      status: false,
+      code: 422,
+      message: "error saving comment",
+      data: {},
     });
   } catch (error) {
     return next(error);

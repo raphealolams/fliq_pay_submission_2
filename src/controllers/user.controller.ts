@@ -3,7 +3,12 @@ import { omit, get } from "lodash";
 import { create } from "../services/users.service";
 import log from "../logger";
 import config from "../config";
-import { validatePassword, findOneUser } from "../services/users.service";
+import {
+  validatePassword,
+  findOneUser,
+  updateUser,
+  findAllUsers,
+} from "../services/users.service";
 import {
   createSession,
   createAccessToken,
@@ -36,7 +41,7 @@ export const login = async (
       log.info(`Invalid username or password ${req.body.email}`);
 
       return res.status(401).send({
-        status: true,
+        status: false,
         code: 401,
         message: "Invalid username or password",
         data: {},
@@ -44,7 +49,7 @@ export const login = async (
     }
     const session = await createSession(user._id, req.get("user-agent") || "");
 
-    const accessToken = createAccessToken({
+    const accessToken = await createAccessToken({
       user,
       session,
     });
@@ -129,8 +134,7 @@ export const register = async (
 };
 
 export const me = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      console.log(get(req, "user"))
+  try {
     const email = get(req, "user.email");
 
     const user = await findOneUser({ email, active: true });
@@ -139,6 +143,84 @@ export const me = async (req: Request, res: Response, next: NextFunction) => {
       code: 200,
       message: "user created",
       data: user,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deleteUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = get(req, "params.userId");
+    const user = await findOneUser({ _id: userId });
+
+    if (!user) {
+      return res.status(404).send({
+        status: false,
+        code: 404,
+        message: "invalid user id",
+        data: {},
+      });
+    }
+
+    await updateUser({ _id: userId }, { active: false }, {});
+
+    return res.status(200).send({
+      status: false,
+      code: 200,
+      message: "user deleted",
+      data: {},
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const users = await findAllUsers({});
+    return res.status(200).send({
+      status: false,
+      code: 200,
+      message: "users fetched",
+      data: omit(users, "password"),
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = get(req, "params.userId");
+    const user = await findOneUser({ _id: userId });
+
+    if (!user) {
+      return res.status(404).send({
+        status: false,
+        code: 404,
+        message: "invalid user id",
+        data: {},
+      });
+    }
+
+    return res.status(200).send({
+      status: true,
+      code: 200,
+      message: "users fetched",
+      data: omit(user, "password"),
     });
   } catch (error) {
     return next(error);

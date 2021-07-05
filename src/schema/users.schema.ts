@@ -29,3 +29,9 @@ export const loginSchema = object({
       .required("Email is required"),
   }),
 });
+
+export const deleteUserSchema = object({
+  params: object({
+    userId: string().required("userId is required")
+  })
+})

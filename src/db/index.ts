@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import log from '../logger'
+import log from "../logger";
 let database: mongoose.Connection;
 
 export const connect = (mediator: any, config: any) => {
@@ -11,11 +11,11 @@ export const connect = (mediator: any, config: any) => {
     database = mongoose.connection;
 
     database.once("open", (db) => {
-      log.info('database connected')
+      log.info("database connected");
       mediator.emit("db.ready", db);
     });
     database.on("error", (err) => {
-      log.error('error connecting to database')
+      log.error("error connecting to database");
       mediator.emit("db.error", err);
     });
   });

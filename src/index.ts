@@ -5,9 +5,9 @@ import { EventEmitter } from "events";
 import config from "./config";
 import { connect, disconnect } from "./db/index";
 import log from "./logger";
-import { usersRoutes } from "./routes/users.route";
 import { server } from "./server";
 import { verifyJWT } from "./middleware/auth";
+import routes from './routes/index.route'
 
 const mediator = new EventEmitter();
 
@@ -24,10 +24,8 @@ mediator.on("db.ready", () => {
       express,
       http,
       config,
-      routes: {
-        usersRoutes,
-      },
       verifyJWT,
+      routes,
     },
   ).then((app: any) => {
     log.info(

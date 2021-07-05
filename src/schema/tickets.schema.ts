@@ -5,17 +5,16 @@ const create = {
     title: string().required("Title is required"),
     description: string()
       .required("Description is required")
-      .min(100, "Body is too short - should be 120 chars minimum."),
+      .min(10, "Description is too short - should be 120 chars minimum."),
   }),
 };
 
 const update = {
   body: object({
-    title: string().required("Title is required"),
-    description: string()
-      .required("Description is required")
-          .min(100, "Body is too short - should be 120 chars minimum."),
-    status: mixed().oneOf(['open', 'closed'])
+    comment: string()
+      .required("comment is required")
+      .min(10, "Description is too short - should be 120 chars minimum."),
+    ticketId: string().required("ticketId is required")
   }),
 };
 
@@ -29,7 +28,7 @@ export const createTicketSchema = object({
   ...create,
 });
 
-export const updateTicketSchema = object({
+export const commentSchema = object({
   ...params,
   ...update,
 });

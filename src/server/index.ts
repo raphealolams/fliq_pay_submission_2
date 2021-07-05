@@ -5,7 +5,7 @@ const start = (app: any, options: any) =>
       express,
       http,
       config,
-      routes: { usersRoutes },
+      routes,
       verifyJWT
     } = options;
 
@@ -58,7 +58,7 @@ const start = (app: any, options: any) =>
       next();
     });
 
-    app.use("/", usersRoutes);
+    routes(app)
 
     /**
      * @author error handling

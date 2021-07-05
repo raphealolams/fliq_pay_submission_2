@@ -17,7 +17,8 @@ const DATABASE_OPTIONS = {
     keepAlive: true,
     poolSize: 50,
     autoIndex: false,
-    retryWrites: false
+    retryWrites: false,
+    useFindAndModify: false
 };
 
 const DATABASE_USERNAME = process.env.DATABASE_USERNAME;

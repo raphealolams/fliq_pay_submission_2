@@ -1,11 +1,11 @@
 import express from "express";
 import {
     createTicketHandler, closeTicketHandler,
-    getMyTicketsHandler, getTicketHandler, getTicketsHandler
+    getMyTicketsHandler, getTicketHandler, getTicketsHandler, saveComment
 } from "../controllers/tickets.controller";
 import validate from "../middleware/validator";
-import { requiresUser, requiresAdmin } from "../middleware/auth";
-import { createTicketSchema, updateTicketSchema, getTicketSchema } from "../schema/tickets.schema";
+import { requiresUser, requiresAdmin, requiresBoth } from "../middleware/auth";
+import { createTicketSchema, commentSchema, getTicketSchema } from "../schema/tickets.schema";
 
 const router = express.Router();
 
@@ -15,10 +15,14 @@ router.post(
   validate(createTicketSchema)],
   createTicketHandler
 );
-router.get("/v1/tickets", requiresAdmin, getTicketsHandler);
-router.get("/v1/tickets/:ticketId", [requiresAdmin, validate(getTicketSchema)], getTicketHandler);
 router.get("/v1/tickets/me", requiresUser, getMyTicketsHandler);
-router.get("/v1/tickets/report", requiresUser, ticket.generateTicketReport);
-router.put("/v1/tickets/close-ticket", requiresUser, validate(updateTicketSchema) closeTicketHandler);
+router.get("/v1/tickets/me/:ticketId", [requiresUser, validate(getTicketSchema)], getTicketHandler);
 
-export { router as usersRoutes };
+router.get("/v1/tickets/:ticketId", [requiresAdmin, validate(getTicketSchema)], getTicketHandler);
+
+router.get("/v1/tickets", requiresAdmin, getTicketsHandler);
+
+router.patch('/v1/tickets/comment/:ticketId', [requiresBoth, validate(commentSchema)], saveComment)
+router.put("/v1/tickets/:ticketId", requiresAdmin, closeTicketHandler);
+
+export { router as TicketsRoutes };

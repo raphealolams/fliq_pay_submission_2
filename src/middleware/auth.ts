@@ -3,21 +3,20 @@ import { Request, Response, NextFunction } from "express";
 import { decode } from "../utils/jwt.utils";
 import { reIssueAccessToken } from "../services/session.service";
 
-const ROLES = ['admin', 'agent']
-const USER_ROLES = ['user']
+const ADMIN_ROLES = ["admin", "agent"];
+const USER_ROLES = ["user"];
 export const requiresUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   const user = get(req, "user");
-
   if (!user || !USER_ROLES.includes(user.role)) {
     return res.status(401).send({
       status: false,
       code: 401,
       message: "Unauthorized",
-      data: {}
+      data: {},
     });
   }
 
@@ -31,26 +30,43 @@ export const requiresAdmin = async (
 ) => {
   const user = get(req, "user");
 
-  if (!user || !ROLES.includes(user.role)) {
+  if (!user || !ADMIN_ROLES.includes(user.role)) {
     return res.status(401).send({
       status: false,
       code: 401,
       message: "Unauthorized",
-      data: {}
+      data: {},
     });
   }
 
   return next();
 };
 
+export const requiresBoth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = get(req, "user");
+  const both = USER_ROLES.concat(ADMIN_ROLES);
+  if (!user || !both.includes(user.role)) {
+    return res.status(401).send({
+      status: false,
+      code: 401,
+      message: "Unauthorized",
+      data: {},
+    });
+  }
 
+  return next();
+};
 
 /**
- * 
- * @param req 
- * @param res 
- * @param next 
- * @returns 
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns
  * @author verifies the jwt token
  * @author Add the new access token to the response header
  */

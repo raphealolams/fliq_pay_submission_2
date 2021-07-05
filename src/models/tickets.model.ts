@@ -2,10 +2,18 @@ import mongoose from "mongoose";
 import { nanoid } from "nanoid";
 import { UserDocument } from "./users.model";
 
+
+// enum Status {
+//   open = 'open',
+//   closed = 'closed'
+// }
+
 export interface TicketDocument extends mongoose.Document {
   user: UserDocument["_id"];
   title: string;
   description: string;
+  status: "open" | "closed";
+  comments: Array<string>;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,4 +1,7 @@
-import { DocumentDefinition, FilterQuery } from 'mongoose';
+import { DocumentDefinition,
+  FilterQuery,
+  UpdateQuery,
+  QueryOptions, } from 'mongoose';
 import { omit } from "lodash";
 import User, { UserDocument } from '../models/users.model';
 
@@ -12,7 +15,7 @@ export const create = async (data: DocumentDefinition<UserDocument>) => {
 }
 
 export const findAllUsers = async (query: FilterQuery<UserDocument>) => {
-  return User.find().lean();
+  return User.find(query).lean();
 }
 
 
@@ -24,9 +27,11 @@ export const deleteUser = (query: FilterQuery<UserDocument>) => {
   return User.findOneAndDelete(query).lean();
 }
 
-export const updateUser = (query: FilterQuery<UserDocument>) => {
-  return User.findOneAndUpdate(query).lean();
-}
+export const updateUser = (query: FilterQuery<UserDocument>,
+  update: UpdateQuery<UserDocument>,
+  options: QueryOptions) =>  {
+  return User.findOneAndUpdate(query, update, options);
+};
 
 export const validatePassword = async({
   email,
